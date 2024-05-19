@@ -2,8 +2,8 @@
 FROM nginx
 #COPY index.html /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY  . /usr/share/nginx/html
-#COPY  build /usr/share/nginx/html
+#sCOPY  . /usr/share/nginx/html
+COPY  build /usr/share/nginx/html
 
 
 
