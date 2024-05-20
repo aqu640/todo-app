@@ -7,18 +7,29 @@
        
 
 # 使用 Node 作為第一個階段建立應用程式
-FROM node:20.11-alpine as build
-
+# 使用Node作为基础镜像
+FROM node:latest as build
+# 设置工作目录
 WORKDIR /app
-COPY . /app
-
-RUN npm install              
+# 复制package.json和package-lock.json文件
+COPY package*.json ./
+# 安装依赖
+RUN npm install
+#将React应用的源代码复制到工作目录
+COPY . .
+# 构建React应用
 RUN npm run build
-
-FROM nginx:alpine
-COPY --from=build /app/dist /usr/share/nginx/html
+# 使用nginx作为基础镜像
+FROM nginx:latest
+# 将React应用的构建文件复制到Nginx的默认静态文件目录
+COPY --from=build/app/build /usr/share/nginx/html
+# 在容器中暴露Nginx的默认端口
 EXPOSE 80
-CMD ["nginx","-g","daemon off;"]
+# 启动Nginx服务器
+CMD["nginx","-g","daemon off;"]
+
+
+
 #FROM node:20.11-alpine as build
 #WORKDIR /app
 #COPY . /app
