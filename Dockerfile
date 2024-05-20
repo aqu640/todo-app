@@ -6,27 +6,19 @@
 #COPY  build /usr/share/nginx/html
        
 
-# 使用 Node 作為第一個階段建立應用程式
-# 使用Node作为基础镜像
+# 使用 Node 作為第一階段建立應用程式
 FROM node:latest as build
-# 设置工作目录
 WORKDIR /app
-# 复制package.json和package-lock.json文件
 COPY package*.json ./
-# 安装依赖
 RUN npm install
-#将React应用的源代码复制到工作目录
 COPY . .
-# 构建React应用
 RUN npm run build
-# 使用nginx作为基础镜像
+
+# 使用 Nginx 作為第二階段來提供服務
 FROM nginx:latest
-# 将React应用的构建文件复制到Nginx的默认静态文件目录
-COPY --from=build/app/build /usr/share/nginx/html
-# 在容器中暴露Nginx的默认端口
+COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
-# 启动Nginx服务器
-CMD["nginx","-g","daemon off;"]
+CMD ["nginx", "-g", "daemon off;"]
 
 
 
