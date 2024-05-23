@@ -7,3 +7,4 @@ services:
 
   redis:
     image: "rl640/image.5.23"
+    
