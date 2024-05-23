@@ -5,3 +5,5 @@ services:
     ports:
       - "8080:80"
 
+  redis:
+    image: "rl640/image.5.23"
