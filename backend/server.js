@@ -1,64 +1,79 @@
-// backend/server.js
 
-/*
+const { Pool } = require('pg');
 const express = require('express');
-const app = express();
-const port = 8080;
-let data = []
+const cors = require('cors');
 
-app.get('/', (req, res) => {
-  res.send(data);
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'test_db',
+  password: 'postgres',
+  port: 5432,
 });
 
-app.get('/iampost', (req, res) => {
-  data.push(req.query.payload)
-  console.log('req.query.payload: ', req.query.payload)
-  console.log('data: ', data)
-  res.send(data);
-});
-
-
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}!`);
-});
-*/
-
-const express = require('express');
 const app = express();
 const port = 8080;
 
+app.use(cors());
 app.use(express.json());
 
 let todos = [];
 
-// 取得所有 Todos
-app.get('/todos', (req, res) => {
-  res.json(todos);
+// 獲取所有 Todos
+app.get('/todos', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM todos');
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // 創建新的 Todo
-app.post('/todos', (req, res) => {
-  const newTodo = req.body;
-  todos.push(newTodo);
-  res.status(201).json(newTodo);
+app.post('/todos', async (req, res) => {
+  const { title, description } = req.body;
+  try {
+    const result = await pool.query(
+      'INSERT INTO todos (title, description) VALUES ($1, $2) RETURNING *',
+      [title, description]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // 更新指定的 Todo
-app.put('/todos/:id', (req, res) => {
+app.put('/todos/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  const updatedTodo = req.body;
-  todos[id] = updatedTodo;
-  res.json(updatedTodo);
+  const { title, description } = req.body;
+  try {
+    const result = await pool.query(
+      'UPDATE todos SET title = $1, description = $2 WHERE id = $3 RETURNING *',
+      [title, description, id]
+    );
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 // 刪除指定的 Todo
-app.delete('/todos/:id', (req, res) => {
+app.delete('/todos/:id', async (req, res) => {
   const id = parseInt(req.params.id);
-  todos.splice(id, 1);
-  res.status(204).send();
+  try {
+    await pool.query('DELETE FROM todos WHERE id = $1', [id]);
+    res.status(204).send();
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
 });
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
 });
+
