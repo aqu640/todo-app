@@ -1,23 +1,21 @@
-
+require('dotenv').config();
 const { Pool } = require('pg');
 const express = require('express');
 const cors = require('cors');
 
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'test_db',
-  password: 'postgres',
-  port: 5432,
+  user: process.env.POSTGRES_USER,
+  host: process.env.POSTGRES_HOST,
+  database: process.env.POSTGRES_DB,
+  password: process.env.POSTGRES_PASSWORD,
+  port: process.env.POSTGRES_PORT,
 });
 
 const app = express();
-const port = 8080;
+const port = process.env.APP_PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
-
-let todos = [];
 
 // 獲取所有 Todos
 app.get('/todos', async (req, res) => {
@@ -76,4 +74,3 @@ app.delete('/todos/:id', async (req, res) => {
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
 });
-

@@ -5,22 +5,21 @@
    # image: "rl640/image.5.23"
     #ports:
      # - "8080:80"
-
 version: "3.7"
 services:
     db-1:
-        container_name: postgres_contsiner
+        container_name: postgres_container
         image: postgres
         restart: always
         environment:
-            POSTGRES_DB: test_db
-            POSTGRES_USER: postgres
-            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: ${POSTGRES_DB}
+            POSTGRES_USER: ${POSTGRES_USER}
+            POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
             PGDATA: /var/lib/postgresql/data
         volumes:
             - postgres-db-data:/var/lib/postgresql/data
         ports:
-            - "5432:5432"
+            - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     pgadmin-1:
         image: dpage/pgadmin4:latest
         restart: always
@@ -32,8 +31,6 @@ services:
             - "8081:80"
         volumes:
             - pgadmin-data:/var/lib/pgadmin
-        #links:
-          #  - "postgres-db:pgsql-server"
 volumes:
     postgres-db-data:
     pgadmin-data:
